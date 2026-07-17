@@ -110,7 +110,9 @@ def extract_amount(text: str) -> int | None:
     normalized = text.lower()
     if any(word in normalized for word in DEBIT_WORDS):
         return None
-    if not any(word in normalized for word in CREDIT_WORDS):
+    is_credit = any(word in normalized for word in CREDIT_WORDS)
+    is_uzqr_payment = "uzqr" in normalized and "new qr" in normalized
+    if not is_credit and not is_uzqr_payment:
         return None
 
     match = AMOUNT_PATTERN.search(normalized)
