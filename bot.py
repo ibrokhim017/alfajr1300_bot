@@ -18,6 +18,9 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
+# HTTP request logs include the bot token in the request URL, so keep them hidden.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("telegram").setLevel(logging.WARNING)
 
 CREDIT_WORDS = (
     "tushdi",
