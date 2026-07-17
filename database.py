@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = "database.db"
+from config import DB_NAME
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
