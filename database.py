@@ -1,33 +1,46 @@
-import aiosqlite
+import sqlite3
 
 DB_NAME = "database.db"
 
-async def init_db():
-    async with aiosqlite.connect(DB_NAME) as db:
-        await db.execute("""
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            amount INTEGER NOT NULL,
-            sms TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
-        await db.commit()
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
 
-async def add_transaction(amount, sms):
-    async with aiosqlite.connect(DB_NAME) as db:
-        await db.execute(
-            "INSERT INTO transactions (amount, sms) VALUES (?, ?)",
-            (amount, sms)
-        )
-        await db.commit()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        amount INTEGER,
+        sms TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
 
-async def get_today_total():
-    async with aiosqlite.connect(DB_NAME) as db:
-        cursor = await db.execute("""
-            SELECT COALESCE(SUM(amount),0)
-            FROM transactions
-            WHERE date(created_at)=date('now','localtime')
-        """)
-        row = await cursor.fetchone()
-        return row[0]
+    conn.commit()
+    conn.close()
+
+def add_transaction(amount, sms):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO transactions (amount, sms) VALUES (?, ?)",
+        (amount, sms)
+    )
+
+    conn.commit()
+    conn.close()
+
+def get_today_total():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount),0)
+        FROM transactions
+        WHERE date(created_at)=date('now','localtime')
+    """)
+
+    total = cursor.fetchone()[0]
+    conn.close()
+
+    return total
